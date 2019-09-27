@@ -1,46 +1,74 @@
 <template>
 <div class="header">
-  <div class="content-wrapper">
+  <div class="content-wrapper" @click="HandleClickHeader">
     <div class="avatar">
-      <img width="64" hight="64" src="http://static.galileo.xiaojukeji.com/static/tms/seller_avatar_256px.jpg" alt="">
+      <img width="64" hight="64" :src="seller.avatar" alt="">
     </div>
     <div class="content">
       <div class="title">
         <span class="brand">
           <img src="./brand@2x.png" alt="">
         </span>
-        <span class="name">粥品香坊（回龙观）</span>
+        <span class="name">{{seller.name}}</span>
       </div>
       <div class="description">
-        蜂鸟专送/38分钟送达
+        {{seller.description}}/{{seller.deliveryTime}}分钟送达
       </div>
-      <div class="support">
+      <div class="support" v-if="seller.supports">
         <span class="support-ico"><img src="../support-ico/decrease_1@2x.png" alt=""></span>
-        <span class="text">在线支付满28减5</span>
+        <span class="text">{{seller.supports[0].description}}</span>
       </div>
     </div>
   </div>
-  <div class="support-count">
-    <span class="count">5个</span>
+  <div class="support-count" v-if="seller.supports">
+    <span class="count">{{seller.supports.length}}个</span>
     <i class="iconfont icon">&#xe601;</i>
   </div>
   <div class="bulletin-wrapper">
     <span class="bulletin-title"><img src="./bulletin@2x.png" alt=""></span>
-    <span class="bulletin-text">
-      粥品香坊其烹饪粥料的秘方源于中国千年古法，在融和现代制作工艺，由世界烹饪大师屈浩先生领衔研发。
-      坚守纯天然、0添加的良心品质深得消费者青睐，发展至今成为粥类的引领品牌。是2008年奥运会和2013年园博会指定餐饮服务商。
-    </span>
+    <span class="bulletin-text">{{seller.bulletin}}</span>
     <i class="iconfont icon">&#xe601;</i>
   </div>
   <div class="background">
-    <img src="http://static.galileo.xiaojukeji.com/static/tms/seller_avatar_256px.jpg" width="100%" height="100%">
+    <img :src="seller.avatar" width="100%" height="100%">
   </div>
+  <HeaderDetail
+  :seller="seller"
+  v-show="showHeader"
+  @close="HandleCloseHeader"
+  ></HeaderDetail>
 </div>
 </template>
 
 <script>
+import HeaderDetail from './HeaderDetail';
+
 export default {
   name: 'Header',
+  props: {
+    seller: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
+  data() {
+    return {
+      showHeader: false,
+    };
+  },
+  components: {
+    HeaderDetail,
+  },
+  methods: {
+    HandleClickHeader() {
+      this.showHeader = true;
+    },
+    HandleCloseHeader() {
+      this.showHeader = false;
+    },
+  },
 };
 </script>
 
@@ -66,7 +94,7 @@ export default {
       .title
         display: flex;
         align-items: center;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         .brand
           width: 30px;
           height: 18px;
@@ -80,7 +108,7 @@ export default {
           font-size: 16px;
           font-weight: bold;
       .description
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         line-height: 12px;
         font-size: 12px;
       .support

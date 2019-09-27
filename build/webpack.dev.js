@@ -1,6 +1,11 @@
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const commonConfig = require('./webpack.common.js');
+const appData = require('../data.json');
+
+const { seller } = appData;
+const { goods } = appData;
+const { ratings } = appData;
 
 const devConfig = {
   mode: 'development',
@@ -10,6 +15,38 @@ const devConfig = {
     open: true,
     port: 8070,
     hot: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8070',
+        changeOrigin: true,
+      },
+    },
+    before(app) {
+      app.get('/api/data', (req, res) => {
+        res.json({
+          ret: true,
+          data: appData,
+        });
+      });
+      app.get('/api/seller', (req, res) => {
+        res.json({
+          ret: true,
+          data: seller,
+        });
+      });
+      app.get('/api/goods', (req, res) => {
+        res.json({
+          errno: 0,
+          data: goods,
+        });
+      });
+      app.get('/api/ratings', (req, res) => {
+        res.json({
+          errno: 0,
+          data: ratings,
+        });
+      });
+    },
   },
   module: {
     rules: [{
