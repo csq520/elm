@@ -12,8 +12,8 @@ const devConfig = {
   devtool: 'cheap-module-eval-source-map',
   devServer: {
     contentBase: './dist',
-    open: true,
-    port: 8070,
+    // open: true,
+    port: 9090,
     hot: true,
     proxy: {
       '/api': {
