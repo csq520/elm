@@ -1,5 +1,6 @@
 <template>
-  <div class="tab">
+  <div>
+    <div class="tab">
     <div class="tab-item">
       <router-link class="tab-link" to="/Goods">
         <div>商品</div>
@@ -12,12 +13,18 @@
       <router-link class="tab-link" to="/Sellers" >商家</router-link>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
 
 export default {
-  name: 'Tab',
+  name: 'tab',
+  props: {
+    seller: {
+      type: Object,
+    },
+  },
 };
 </script>
 
@@ -29,6 +36,7 @@ export default {
     width: 100%;
     height: 40px;
     line-height: 40px;
+    border-bottom 1px solid rgba(7,17,27,0.1)
     .tab-item
       flex: 1;
       text-align: center;
@@ -37,10 +45,10 @@ export default {
         color: rgb(77,85,93);
         font-size: 16px;
         border-bottom: 1px solid rgba(7,17,27,0.1);
+        &.active
+         color: rgb(240,20,20)
       .line
         width: 138px;
         border-bottom: rgb(240,20,20);
         transform: translateX(0px) translateZ(0px);
-      .tab-link:focus
-        color: rgb(240,20,20);
 </style>

@@ -1,27 +1,27 @@
 <template>
 <div class="Home">
   <Header :seller="seller"></Header>
-  <Tab class="tab"></Tab>
-  <Goods class="Goods"></Goods>
+  <tab :seller="seller"></tab>
+  <router-view></router-view>
 </div>
 </template>
 
 <script>
 import axios from 'axios';
-import Header from '../header/Header';
-import Tab from '../tab/Tab';
-import Goods from '../goods/Goods';
+import Header from '../header/Header.vue';
+import tab from '../tab/tab.vue';
 
 export default {
   name: 'Home',
   components: {
     Header,
-    Tab,
-    Goods,
+    tab,
   },
   data() {
     return {
       seller: {},
+      ratings: {},
+      goods: {},
     };
   },
   methods: {
@@ -34,9 +34,15 @@ export default {
     },
     getHeaderInfoSucc(res) {
       res = res.data;
-      if (res.data) {
+      // console.log(res);
+      if (res.ret && res.data) {
         const { data } = res;
+        // console.log(res.data.seller.id);
+        // console.log(res.data);
+        // console.log(res.data.avatar);
         this.seller = data.seller;
+        this.ratings = data.ratings;
+        this.goods = data.goods;
       }
     },
   },
@@ -47,16 +53,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.tab
-  position: fixed
-  top: 136px
-  left: 0
-  right: 0
-  bottom: 0
-.Goods
-  position: relative;
-  top: 40px;
-  left: 0;
-  right: 0;
-  bottom: 0;
 </style>

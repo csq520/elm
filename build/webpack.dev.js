@@ -15,9 +15,11 @@ const devConfig = {
     // open: true,
     port: 9090,
     hot: true,
+    historyApiFallback: true,
+    host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:8070',
+        target: 'http://localhost:9090',
         changeOrigin: true,
       },
     },

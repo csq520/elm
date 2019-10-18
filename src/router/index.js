@@ -1,18 +1,21 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from '../pages/home/Home';
-import Goods from '../pages/goods/Goods';
-import Ratings from '../pages/ratings/Ratings';
-import Sellers from '../pages/sellers/Sellers';
-import FoodDetail from '../pages/goods/FoodDetail';
+import Home from '../pages/home/Home.vue';
+import Goods from '../pages/goods/Goods.vue';
+import Ratings from '../pages/ratings/Ratings.vue';
+import Sellers from '../pages/sellers/Sellers.vue';
+import FoodDetail from '../pages/goods/FoodDetail.vue';
 
 Vue.use(Router);
+const originalPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch((err) => err);
+};
 
 export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Home',
       component: Home,
       children: [
         {
@@ -38,4 +41,6 @@ export default new Router({
       component: FoodDetail,
     },
   ],
+  mode: 'history',
+  linkActiveClass: 'active',
 });

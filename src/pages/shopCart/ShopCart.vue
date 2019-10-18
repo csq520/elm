@@ -1,32 +1,82 @@
 <template>
-  <div>
     <div class="shopCart">
-      <div class="content">
+      <div class="content" @click="toggleList">
         <div class="content-left">
           <div class="logo-wrapper">
-            <div class="logo">
-              <i class="iconfont iconCar">&#xe61a;</i>
+            <div class="logo" :class="{'highlight':totalCount>0}">
+              <i class="iconfont iconCar" :class="{'highlight':totalCount>0}">&#xe61a;</i>
             </div>
-            <div class="num" >
-            </div>
+            <div class="num" v-show="totalCount>0">{{totalCount}}</div>
           </div>
-          <div class="price">￥</div>
-          <div class="desc">另需配送费￥元</div>
+          <div class="price" :class="{'highlight':totalPrice>0}">￥{{totalPrice}}</div>
+          <div class="desc">另需配送费￥{{seller.deliveryPrice}}元</div>
         </div>
         <div class="content-right">
-          <div class="pay">
-            ¥20元起送
+          <div class="pay" :class="payClass">
+            {{payDesc}}
           </div>
         </div>
       </div>
+      <div class="ball-container">
+            <div v-for="(ball,index) in balls" :key="index">
+              <transition name="drop"
+                          @before-enter="beforeDrop"
+                          @enter="dropping"
+                          @after-enter="afterDrop"
+              >
+                <div v-show="ball.show" class="ball">
+                  <div class="inner inner-hook"></div>
+                </div>
+              </transition>
+            </div>
+      </div>
+      <transition name="fade" appear>
+        <div class="shopCart-list" v-show="listShow">
+          <transition name="move" appear>
+            <div class="list-header">
+              <div class="title">购物车</div>
+              <span class="empty">清空</span>
+            </div>
+            <div class="list-content">
+              <ul>
+                <li class="food" v-for="(food,index) in selectFoods" :key="index">
+                  <span class="name">{{food.name}}</span>
+                  <div class="price">
+                    <span>￥{{food.price*food.count}}</span>
+                  </div>
+                  <div class="cart-control-wrapper">
+                    <CartControl :food="food"></CartControl>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </transition>
+        </div>
+      </transition>
     </div>
-  </div>
 </template>
 
 <script>
+import CartControl from '../cartControl/CartControl';
 
+function createBalls() {
+  const balls = [];
+  for (let i = 0; i < 10; i++) {
+    balls.push({ show: false });
+  }
+  return balls;
+}
 export default {
-  name: 'ShopCart',
+  name: 'shopCart',
+  data() {
+    return {
+      balls: createBalls(),
+      fold: true,
+    };
+  },
+  created() {
+    this.dropBalls = [];
+  },
   props: {
     selectFoods: {
       type: Array,
@@ -34,19 +84,115 @@ export default {
         return [];
       },
     },
+    seller: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
+  components: {
+    CartControl,
+  },
+  computed: {
+    totalPrice() {
+      let total = 0;
+      this.selectFoods.forEach((food) => {
+        total += food.price * food.count;
+      });
+      return total;
+    },
+    totalCount() {
+      let count = 0;
+      this.selectFoods.forEach((food) => {
+        count += food.count;
+      });
+      return count;
+    },
+    payDesc() {
+      if (this.totalPrice === 0) {
+        return `¥${this.seller.minPrice}元起送`;
+      } if (this.totalPrice < this.seller.minPrice) {
+        const diff = this.seller.minPrice - this.totalPrice;
+        return `还差¥${diff}元起送`;
+      }
+      return '去结算';
+    },
+    payClass() {
+      if (this.totalPrice < this.seller.minPrice) {
+        return 'not-enough';
+      }
+      return 'enough';
+    },
+    listShow() {
+      if (!this.totalCount) {
+        this.fold = true;
+        return false;
+      }
+      const show = !this.fold;
+      return show;
+    },
+  },
+  methods: {
+    drop(el) {
+      for (let i = 0; i < this.balls.length; i++) {
+        const ball = this.balls[i];
+        if (!ball.show) {
+          ball.show = true;
+          ball.el = el;
+          this.dropBalls.push(ball);
+          return;
+        }
+      }
+    },
+    beforeDrop(el) {
+      const ball = this.dropBalls[this.dropBalls.length - 1];
+      const rect = ball.el.getBoundingClientRect();
+      const x = rect.left - 32;
+      const y = -(window.innerHeight - rect.top - 22);
+      el.style.display = '';
+      el.style.transform = `translate3d(0,${y}px,0)`;
+      el.style.webkitTransform = `translate3d(0,${y}px,0)`;
+      const inner = el.getElementsByClassName('inner-hook')[0];
+      inner.style.transform = `translate3d(${x}px,0,0)`;
+      inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+    },
+    dropping(el) {
+      this._reflow = document.body.offsetHeight
+      this.$nextTick(() => {
+        el.style.transform = 'translate3d(0,0,0)';
+        el.style.webkitTransform = 'translate3d(0,0,0)';
+        const inner = el.getElementsByClassName('inner-hook')[0];
+        inner.style.transform = 'translate3d(0,0,0)';
+        inner.style.webkitTransform = 'translate3d(0,0,0)';
+        // el.addEventListener('transitionend', done);
+      });
+    },
+    afterDrop(el) {
+      const ball = this.dropBalls.shift();
+      if (ball) {
+        ball.show = false;
+        el.style.display = 'none';
+      }
+    },
+    toggleList() {
+      if (!this.totalCount) {
+        return;
+      }
+      this.fold = !this.fold;
+    },
   },
 };
 </script>
 
 <style lang="stylus" scoped>
   .shopCart
-    position fixed
-    top 516px
+    position: fixed;
     left: 0;
-    right: 0;
     bottom: 0;
-    height: 100%
-    width 100%
+    z-index 50
+    width: 100%;
+    height: 48px
     .content
       display: flex
       background: rgba(7, 17, 27, 1)
@@ -71,19 +217,29 @@ export default {
             height: 100%
             border-radius: 50%
             text-align: center
-            background: #333
+            background: #2b343c;
             &.highlight
               background: rgb(0, 160, 220)
             .iconCar
               line-height: 44px
               font-size: 20px
-              color: #999
+              color: #80858a
               &.highlight
                 color: #fff
           .num
             position: absolute
             top: 0
             right: 0
+            width: 24px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            border-radius 16px
+            font-size 9px
+            font-weight 700
+            color: #fff;
+            background: rgb(240,20,20);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)
         .price
           display: inline-block
           vertical-align: top
@@ -111,12 +267,11 @@ export default {
           text-align: center
           font-weight: 700
           font-size: 12px
-          background: #333;
           &.not-enough
-            background: #999
+            background: #2b333b;
           &.enough
             background: #00b43c
-            color: #999
+            color: #fff
     .ball-container
       .ball
         position: fixed
@@ -130,4 +285,33 @@ export default {
           border-radius: 50%
           background: rgb(0, 160, 220)
           transition: all 0.4s linear
+    .shopCart-list
+      bottom: 48px
+      &.fade-enter, &.fade-leave-active
+        opacity: 0
+      &.fade-enter-active, &.fade-leave-active
+        transition: all .3s ease-in-out
+      .move-enter, .move-leave-active
+        transform: translate3d(0, 100%, 0)
+      .move-enter-active, .move-leave-active
+        transition: all .3s ease-in-out
+      .list-header
+        height: 40px;
+        line-height: 40px;
+        padding: 0 18px;
+        color: #f3f5f7;
+        border-bottom 1px solid rgba(7,17,27,0.1)
+        .title
+          float: left;
+          font-size 14px
+          color: rgb(7,17,27);
+        .empty
+          float: right;
+          font-size 12px
+          color: rgb(0,160,220);
+      .list-content
+        padding:0 18px
+        max-height:217px
+        overflow hidden
+        background: #fff;
 </style>

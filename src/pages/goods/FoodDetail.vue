@@ -1,19 +1,19 @@
 <template>
-  <div class="FoodDetail">
+<div class="FoodDetail">
+  <div>
     <div>
-      <div>
-        <div class="headerImg">
-          <div class="back">
-            <i class="iconfont icon" @click="handleCloseFood">&#xe641;</i>
-          </div>
-          <img src="http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/750/h/750" alt="">
+      <div class="headerImg">
+        <div class="back">
+          <i class="iconfont icon" @click="handleCloseFood">&#xe641;</i>
         </div>
-        <div class="content">
-          hello world
-        </div>
+        <img src="http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/750/h/750" alt="">
+      </div>
+      <div class="content">
+        hello world
       </div>
     </div>
-  </div>
+    </div>
+</div>
 </template>
 
 <script>
