@@ -1,4 +1,5 @@
 <template>
+  <div>
     <div class="shopCart">
       <div class="content" @click="toggleList">
         <div class="content-left">
@@ -11,52 +12,55 @@
           <div class="price" :class="{'highlight':totalPrice>0}">￥{{totalPrice}}</div>
           <div class="desc">另需配送费￥{{seller.deliveryPrice}}元</div>
         </div>
-        <div class="content-right">
+        <div class="content-right" @click.stop.prevent="pay">
           <div class="pay" :class="payClass">
             {{payDesc}}
           </div>
         </div>
       </div>
       <div class="ball-container">
-            <div v-for="(ball,index) in balls" :key="index">
-              <transition name="drop"
-                          @before-enter="beforeDrop"
-                          @enter="dropping"
-                          @after-enter="afterDrop"
-              >
-                <div v-show="ball.show" class="ball">
-                  <div class="inner inner-hook"></div>
-                </div>
-              </transition>
-            </div>
-      </div>
-      <transition name="fade" appear>
-        <div class="shopCart-list" v-show="listShow">
-          <transition name="move" appear>
-            <div class="list-header">
-              <div class="title">购物车</div>
-              <span class="empty">清空</span>
-            </div>
-            <div class="list-content">
-              <ul>
-                <li class="food" v-for="(food,index) in selectFoods" :key="index">
-                  <span class="name">{{food.name}}</span>
-                  <div class="price">
-                    <span>￥{{food.price*food.count}}</span>
-                  </div>
-                  <div class="cart-control-wrapper">
-                    <CartControl :food="food"></CartControl>
-                  </div>
-                </li>
-              </ul>
+        <div v-for="(ball,index) in balls" :key="index">
+          <transition name="drop"
+                      @before-enter="beforeDrop"
+                      @enter="dropping"
+                      @after-enter="afterDrop"
+          >
+            <div v-show="ball.show" class="ball">
+              <div class="inner inner-hook"></div>
             </div>
           </transition>
         </div>
+      </div>
+      <transition name="fade" appear="true">
+        <div class="shopCart-list" v-show="listShow">
+          <div class="list-header">
+            <div class="title">购物车</div>
+            <span class="empty" @click="empty">清空</span>
+          </div>
+          <div class="list-content" ref="wrapper">
+            <ul>
+              <li class="food" v-for="(food,index) in selectFoods" :key="index">
+                <span class="name">{{food.name}}</span>
+                <div class="price">
+                  <span>￥{{food.price*food.count}}</span>
+                </div>
+                <div class="cart-control-wrapper">
+                  <CartControl :food="food"></CartControl>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </transition>
     </div>
+    <transition name="fade">
+      <div class="list-mask" v-show="listShow" @click="hideList"></div>
+    </transition>
+  </div>
 </template>
 
 <script>
+import Bscroll from 'better-scroll';
 import CartControl from '../cartControl/CartControl';
 
 function createBalls() {
@@ -130,6 +134,19 @@ export default {
         return false;
       }
       const show = !this.fold;
+      if (show) { // true为展示状态
+        this.$nextTick(() => {
+          if (!this.scroll) {
+            const options = {
+              click: true,
+              taps: true,
+            };
+            this.scroll = new Bscroll(this.$refs.wrapper, options);
+          } else {
+            this.scroll.refresh();
+          }
+        });
+      }
       return show;
     },
   },
@@ -181,16 +198,31 @@ export default {
       }
       this.fold = !this.fold;
     },
+    empty() {
+      this.selectFoods.forEach((food) => {
+        food.count = 0;
+      });
+    },
+    hideList() {
+      this.fold = true;
+    },
+    pay() {
+      if (this.totalPrice < this.minPrice) {
+        return;
+      }
+      window.alert(`支付￥${this.totalPrice}元`);
+    },
   },
 };
 </script>
 
 <style lang="stylus" scoped>
+  @import "../../common/styles/stylus/mixin.styl"
   .shopCart
     position: fixed;
     left: 0;
     bottom: 0;
-    z-index 50
+    z-index: 50;
     width: 100%;
     height: 48px
     .content
@@ -286,20 +318,22 @@ export default {
           background: rgb(0, 160, 220)
           transition: all 0.4s linear
     .shopCart-list
-      bottom: 48px
-      &.fade-enter, &.fade-leave-active
-        opacity: 0
+      position absolute
+      left: 0;
+      top: 0;
+      z-index: -1;
+      width: 100%
+      transform translate3d(0,-100%,0)
       &.fade-enter-active, &.fade-leave-active
-        transition: all .3s ease-in-out
-      .move-enter, .move-leave-active
-        transform: translate3d(0, 100%, 0)
-      .move-enter-active, .move-leave-active
-        transition: all .3s ease-in-out
+        transition: all 0.5s ease-in-out
+        transform translate3d(0,-100%,0)
+      &.fade-enter, &.fade-leave-active
+        transform translate3d(0,0,0)
       .list-header
         height: 40px;
         line-height: 40px;
         padding: 0 18px;
-        color: #f3f5f7;
+        background: #f3f5f7;
         border-bottom 1px solid rgba(7,17,27,0.1)
         .title
           float: left;
@@ -314,4 +348,42 @@ export default {
         max-height:217px
         overflow hidden
         background: #fff;
+        .food
+          position relative
+          padding 12px 0
+          box-sizing border-box
+          .name
+            line-height: 24px
+            font-size: 14px
+            color: rgb(7,17,27)
+          .price
+            position: absolute
+            right: 90px
+            bottom: 12px
+            line-height: 24px
+            font-weight: 700
+            font-size: 14px
+            color: rgb(240,20,20)
+          .cart-control-wrapper
+            position: absolute
+            right: 0
+            bottom: 6px
+  .list-mask
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    z-index: 40
+    backdrop-filter: blur(5px) // 模糊效果
+    -webkit-backdrop-filter blur(5px)
+    opacity: 1
+    background: rgba(7, 17, 27, 0.6)
+    &.fade-enter-active, &.fade-leave-active
+      transition: all 0.5s
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
 </style>

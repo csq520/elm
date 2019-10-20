@@ -3,7 +3,10 @@
     <div>
       <div class="sidebar">
         <ul>
-          <li v-for="item of goods" :key="item.id" @click="handleLetterClick" class="sidebar-item">
+          <li v-for="item of goods"
+              :key="item.id"
+              @click="handleLetterClick"
+              class="sidebar-item">
                <span class="text border-1px">
           <!--<support-ico v-show="item.type>0" :size="3"-->
                  <!--:type="seller.supports[index].type class="icon"></support-ico>-->

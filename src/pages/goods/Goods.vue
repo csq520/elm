@@ -1,67 +1,75 @@
 <template>
-<div class="goods">
-  <Sidebar :goods="goods" @change="handleLetterChange"></Sidebar>
-  <div ref="wrapper">
-    <div  class="foods">
-      <ul>
-        <li class="foods-list" v-for="item of goods" :key="item.id" :ref="item.name">
-          <h1 class="title" >{{item.name}}</h1>
-          <div class="foods-item border-1px foods-list-hook" v-for="food of item.foods" :key="food.id">
-            <div class="icon">
-              <img :src="food.image" class="foods-img" alt="">
-            </div>
-            <div class="content">
-              <h2 class="name">{{food.name}}</h2>
-              <p class="desc">{{food.description}}</p>
-              <div class="extra">
-                <span class="count">月售{{food.sellCount}}份</span>
-                <span>好评率{{food.rating}}%</span>
+  <div>
+    <div class="goods">
+      <Sidebar :goods="goods" @change="handleLetterChange"></Sidebar>
+      <div ref="wrapper">
+        <div  class="foods">
+          <ul>
+            <li class="foods-list"
+                v-for="item of goods"
+                :key="item.id"
+                :ref="item.name"
+            >
+              <h1 class="title" >{{item.name}}</h1>
+              <div class="foods-item border-1px"
+                   v-for="food of item.foods" :key="food.id"
+                   @click="selectFood(food,$event)"
+              >
+                <div class="icon">
+                  <img :src="food.image" class="foods-img" alt="">
+                </div>
+                <div class="content">
+                  <h2 class="name">{{food.name}}</h2>
+                  <p class="desc">{{food.description}}</p>
+                  <div class="extra">
+                    <span class="count">月售{{food.sellCount}}份</span>
+                    <span>好评率{{food.rating}}%</span>
+                  </div>
+                  <div class="price">
+                    <span class="now">￥{{food.price}}</span>
+                    <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
+                  </div>
+                  <div class="cartControl-wrapper">
+                    <CartControl :food="food" @cartAdd="handleCartAdd"></CartControl>
+                  </div>
+                </div>
               </div>
-              <div class="price">
-                <span class="now">￥{{food.price}}</span>
-                <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
-              </div>
-              <div class="cartControl-wrapper">
-                <CartControl :food="food" @cartAdd="handleCartAdd"></CartControl>
-              </div>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
-    <!--<FoodDetail-->
-    <!--v-show="showFood"-->
-    <!--@close="closeFood"-->
-    <!--&gt;-->
-    <!--</FoodDetail>-->
+            </li>
+          </ul>
+        </div>
+      </div>
+      <shopCart :seller="seller" :select-foods="selectFoods"  ref="shopCart"></shopCart>
   </div>
-  <shopCart :seller="seller" :select-foods="selectFoods"  ref="shopCart"></shopCart>
+    <Food :food="selectedFoods" ref="food"></Food>
 </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Bscroll from 'better-scroll';
-import Sidebar from './Sidebar.vue';
-// import Foods from './Foods.vue';
-import shopCart from '../shopCart/shopCart.vue';
+import Sidebar from './Sidebar';
+import shopCart from '../shopCart/shopCart';
 import CartControl from '../cartControl/CartControl';
+import Food from '../food/Food';
 
 export default {
   name: 'Goods',
   data() {
     return {
       goods: [],
+      scrollY: {},
+      listHeight: [],
       seller: {},
       letter: {},
       food: [],
+      selectedFoods: {},
     };
   },
   components: {
     Sidebar,
-    // Foods,
     shopCart,
     CartControl,
+    Food,
   },
   methods: {
     getFoodInfo() {
@@ -93,49 +101,36 @@ export default {
         this.$refs.shopCart.drop(target);
       });
     },
-    // getA() {
-    //   axios.get('/api/goods')
-    //     .then(this.getAInfoSucc)
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // },
-    // getAInfoSucc(res) {
-    //   res = res.data;
-    //   console.log(res);
-    //   console.log(res.data);
-    //   if (res.errno === 0 && res.data) {
-    //     const { data } = res;
-    //     console.log(data);
-    //     console.log(data['0'].foods);
-    //     // this.goods = data.goods;
-    //   }
-    // },
+    selectFood(food, event) {
+      if (!event._constructed) {
+        return;
+      }
+      this.selectedFoods = food;
+      this.$refs.food.show();
+    },
   },
-  //   grid-template-columns: 80px auto;
-  // grid-template-rows: 516px auto;
   mounted() {
     this.getFoodInfo();
     const options = {
       scrollX: true,
+      probeType: 3,
       mouseWheel: true,
       click: true,
       taps: true,
     };
     this.scroll = new Bscroll(this.$refs.wrapper, options);
-    // this.getA();
   },
   computed: {
-    // currentIndex() {
-    //   for (let i = 0; i < this.listHeight; i++) {
-    //     let height1 = this.listHeight[i];
-    //     let height2 = this.listHeight[i + 1];
-    //     if (!height2 || (this.scrollY > height1 && this.scrollY < height2)) {
-    //       return i;
-    //     }
-    //   }
-    //   return 0;
-    // },
+    currentIndex() {
+      for (let i = 0; i < this.listHeight; i++) {
+        const height1 = this.listHeight[i];
+        const height2 = this.listHeight[i + 1];
+        if (!height2 || (this.scrollY > height1 && this.scrollY < height2)) {
+          return i;
+        }
+      }
+      return 0;
+    },
     selectFoods() {
       const foods = [];
       this.goods.forEach((good) => {
@@ -154,12 +149,6 @@ export default {
         const element = this.$refs[this.letter][0];
         // console.log(element);
         this.scroll.scrollToElement(element);
-      }
-      if (this.scroll) {
-        this.scroll.on('scroll', (pos) => {
-          this.scrollY = Math.abs(Math.round(pos.y));
-        });
-        // console.log(this.scrollY);
       }
     },
   },

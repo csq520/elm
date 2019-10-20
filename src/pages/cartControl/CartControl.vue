@@ -2,14 +2,14 @@
     <div class="cartControl">
       <transition name="move">
         <div class="cart-decrease"
-             @click="decreaseCart"
+             @click.stop.prevent="decreaseCart"
              v-show="food.count>0"
         >
           <span class="iconfont inner">&#xe617;</span>
         </div>
       </transition>
       <div class="cart-count" v-show="food.count>0">{{food.count}}</div>
-      <div class="iconfont cart-add" @click="addCart">&#xe638;</div>
+      <div class="iconfont cart-add" @click.stop.prevent="addCart">&#xe638;</div>
     </div>
 </template>
 
@@ -57,9 +57,6 @@ export default {
   .cart-decrease
     display: inline-block;
     padding 6px
-    &.move-transition
-      opacity: 1
-      transform translate3d(0,0,0)
     .inner
       display inline-block
       line-height: 24px;

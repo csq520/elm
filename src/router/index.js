@@ -4,7 +4,6 @@ import Home from '../pages/home/Home.vue';
 import Goods from '../pages/goods/Goods.vue';
 import Ratings from '../pages/ratings/Ratings.vue';
 import Sellers from '../pages/sellers/Sellers.vue';
-import FoodDetail from '../pages/goods/FoodDetail.vue';
 
 Vue.use(Router);
 const originalPush = Router.prototype.push;
@@ -34,11 +33,6 @@ export default new Router({
           component: Sellers,
         },
       ],
-    },
-    {
-      path: '/FoodDetail',
-      name: 'FoodDetail',
-      component: FoodDetail,
     },
   ],
   mode: 'history',

@@ -1,18 +1,19 @@
 <template>
   <div>
     <div class="tab">
-    <div class="tab-item">
-      <router-link class="tab-link" to="/Goods">
-        <div>商品</div>
-      </router-link>
+      <div class="tab-item">
+        <router-link class="tab-link" v-bind:to="'/Goods'">
+          <div>商品</div>
+          <div class="line"></div>
+        </router-link>
+      </div>
+      <div class="tab-item">
+        <router-link class="tab-link" to="/Ratings">评论</router-link>
+      </div>
+      <div class="tab-item">
+        <router-link class="tab-link" to="/Sellers" >商家</router-link>
+      </div>
     </div>
-    <div class="tab-item">
-      <router-link class="tab-link" to="/Ratings">评论</router-link>
-    </div>
-    <div class="tab-item">
-      <router-link class="tab-link" to="/Sellers" >商家</router-link>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -44,7 +45,13 @@ export default {
         display: block;
         color: rgb(77,85,93);
         font-size: 16px;
-        border-bottom: 1px solid rgba(7,17,27,0.1);
+        .line
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          height: 2px;
+          width: 125px;
+          background-color: #f01414;
         &.active
          color: rgb(240,20,20)
       .line
