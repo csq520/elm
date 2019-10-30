@@ -34,21 +34,36 @@
           <p class="text">{{food.info}}</p>
         </div>
         <split></split>
-         <div class="rating-wrapper">
-        <ul v-show="food.ratings && food.ratings.length">
-          <li v-show="needShow(rating.rateType, rating.text)" v-for="rating in food.ratings" :key="rating.id" class="rating-item border-1px">
-            <div class="user">
-              <span class="name">{{rating.username}}</span>
-              <img class="avatar" height="12" width="12"  :src="rating.avatar" alt="">
-            </div>
-            <div class="time">{{rating.rateTime | formatDate}}</div>
-            <p class="text">
-              <span :class="{'icon-thumb_up':rating.rateType === 0, 'icon-thumb_down':rating.rateType === 1}"></span>{{rating.text}}
-            </p>
-          </li>
-        </ul>
-        <div class="no-ratings" v-show="!food.ratings || !food.ratings.length">暂无评价</div>
-      </div>
+        <div class="rating">
+          <h1 class="title">商品评价</h1>
+          <ratingSelect
+            @increment="incrementTotal"
+            :select-type="selectType"
+            :only-content="onlyContent"
+            :desc="desc"
+            :ratings="food.ratings"
+          ></ratingSelect>
+          <div class="rating-wrapper">
+            <ul v-show="food.ratings && food.ratings.length">
+              <li v-show="needShow(rating.rateType,rating.text)"
+                  v-for="(rating,index) in food.ratings"
+                  :key="index" class="rating-item border-1px">
+                <div class="user">
+                  <span class="name">{{rating.username}}</span>
+                  <img :src="rating.avatar" alt="" width="12" height="12" class="avatar">
+                </div>
+                <div class="time">{{rating.rateTime | formatDate}}</div>
+                <p class="text">
+                  <span
+                    :class="{'icondianzan':rating.rateType=== 0,'iconcai-f':rating.rateType=== 1}"
+                  >
+                  </span>{{rating.text}}
+                </p>
+              </li>
+            </ul>
+            <div class="no-rating" v-show="!food.ratings || !food.ratings.length">暂无评价</div>
+          </div>
+        </div>
       </div>
     </div>
   </transition>
@@ -59,39 +74,54 @@ import Bscroll from 'better-scroll';
 import Vue from 'vue';
 import CartControl from '../cartControl/CartControl';
 import split from '../split/split';
+import ratingSelect from '../ratingSelect/ratingSelect';
+import { formatDate } from '../../common/js/date';
+
+// const POSITIVE = 0;
+// const NEGATIVE = 1;
+const ALL = 2;
 
 export default {
   name: 'Food',
   data() {
     return {
       showFood: false,
+      selectType: ALL,
+      onlyContent: '',
     };
   },
   props: {
     food: {
       type: Object,
     },
-    // selectType: All,
-    onlyContent: true,
     desc: {
       all: '全部',
       positive: '推荐',
       negative: '吐槽',
     },
   },
+
+  filters: {
+    formatDate(time) {
+      let date = new Date(time);
+      return formatDate(date, 'yyyy-MM-dd hh:mm');
+    },
+  },
   components: {
     CartControl,
     split,
+    ratingSelect,
   },
   computed: {},
   methods: {
     show() {
       this.showFood = true;
+      this.selectType = ALL;
+      this.onlyContent = true;
       this.$nextTick(() => {
         if (!this.scroll) {
           const options = {
             click: true,
-            taps: true,
           };
           this.scroll = new Bscroll(this.$refs.wrapper, options);
         } else {
@@ -116,20 +146,29 @@ export default {
       });
     },
     needShow(type, text) {
-      // console.log('this.selectType: ' + this.selectType + '  type: ' + type + ' out  ' + text);
+    // console.log(`this.selectType: ${  this.selectType  }  type: ${  type  } out  ${  text}`);
       if (this.onlyContent && !text) {
         return false;
       }
-      // if (this.selectType === ALL) {
-      //   return true;
-      // }
+      if (this.selectType === ALL) {
+        return true;
+      }
       return type === this.selectType;
     },
   },
+  // created() {
+  //   'selectType'(type) {
+  //     this.selectType = type;
+  //   };
+  //   'toggle-content'(onlyContent) {
+  //     this.onlyContent = onlyContent;
+  //   }
+  // }
 };
 </script>
 
 <style  lang="stylus" scoped>
+  @import "../../common/styles/stylus/mixin.styl"
   .food
     position: fixed;
     z-index: 30;
@@ -218,15 +257,63 @@ export default {
           &.fade-enter, &fade-leave-active
             opacity 0
       .info
-      padding 18px
-      .title
-        line-height 14px
-        margin-bottom 16px
-        font-size 14px
-        color rgb(7,17,27)
-      .text
-        line-height 24px
-        padding 0 8px
-        font-size 12px
-        color rgb(77,85,93)
+        padding 18px
+        .title
+          line-height 14px
+          margin-bottom 16px
+          font-size 14px
+          color rgb(7,17,27)
+        .text
+          line-height 24px
+          padding 0 8px
+          font-size 12px
+          color rgb(77,85,93)
+      .rating
+        padding-top 18px
+        .title
+          line-height 14px
+          margin-left 18px
+          font-size 14px
+          color rgb(7,17,27)
+        .rating-wrapper
+          padding: 0 18px;
+          .rating-item
+            position: relative
+            padding 16px 0
+            border-1px(rgba(7,17,27,0.1))
+            .user
+              position: absolute
+              right: 0;
+              top: 16px
+              line-height: 12px;
+              font-size 0
+              .name
+                display: inline-block
+                vertical-align: top
+                margin-right 6px
+                font-size 10px
+                color: rgb(147,153,159);
+              .avatar
+                border-radius 50%
+            .time
+              margin-bottom: 6px;
+              line-height: 12px;
+              font-size 10px
+              color: rgb(147,153,159);
+            .text
+              line-height: 16px;
+              font-size 12px
+              color: rgb(7,17,27);
+              .icondianzan, .iconcai-f
+                margin-right 4px
+                line-height: 16px;
+                font-size 12px
+              .icondianzan
+                color: rgb(0,160,220);
+              .iconcai-f
+                color: rgb(147,153,159);
+          .no-rating
+            padding 16px 0
+            font-size 12px
+            color: rgb(147,153,159);
 </style>

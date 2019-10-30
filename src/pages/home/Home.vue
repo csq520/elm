@@ -2,7 +2,7 @@
 <div class="Home">
   <Header :seller="seller"></Header>
   <tab :seller="seller"></tab>
-  <router-view></router-view>
+  <router-view :seller="seller"></router-view>
 </div>
 </template>
 

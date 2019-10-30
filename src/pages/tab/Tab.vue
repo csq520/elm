@@ -4,7 +4,7 @@
       <div class="tab-item">
         <router-link class="tab-link" v-bind:to="'/Goods'">
           <div>商品</div>
-          <div class="line"></div>
+          <!--<div class="line"></div>-->
         </router-link>
       </div>
       <div class="tab-item">
@@ -54,8 +54,7 @@ export default {
           background-color: #f01414;
         &.active
          color: rgb(240,20,20)
-      .line
-        width: 138px;
-        border-bottom: rgb(240,20,20);
-        transform: translateX(0px) translateZ(0px);
+      /*.line*/
+        /*width: 138px;border-bottom: rgb(240,20,20);
+        transform: translateX(0px) translateZ(0px)*/
 </style>

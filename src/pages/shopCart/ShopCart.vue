@@ -31,7 +31,7 @@
           </transition>
         </div>
       </div>
-      <transition name="fade" appear="true">
+      <transition name="fade" appear>
         <div class="shopCart-list" v-show="listShow">
           <div class="list-header">
             <div class="title">购物车</div>

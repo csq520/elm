@@ -63,6 +63,7 @@ export default {
       letter: {},
       food: [],
       selectedFoods: {},
+      ratings: [],
     };
   },
   components: {
@@ -88,8 +89,10 @@ export default {
         // console.log(data.goods['0'].name);
         // console.log(data.goods['0'].foods['0'].name);
         // console.log(data.goods['0'].foods['0']);
+        // console.log(data.goods['0'].foods['0'].ratings);
         this.goods = data.goods;
         this.seller = data.seller;
+        this.ratings = data.ratings;
       }
     },
     handleLetterChange(letter) {
